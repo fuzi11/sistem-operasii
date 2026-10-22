@@ -1,13 +1,14 @@
 #!/bin/bash
 set -e
 
-echo "=== [Bab 3.1] Persiapan Direktori Sources ==="
+export LFS=${LFS:-/mnt/lfs}
+
+echo "=== [Bab 3] Menyiapkan Folder Sources ==="
 mkdir -pv $LFS/sources
 chmod -v a+wt $LFS/sources
-
 cd $LFS/sources
 
-echo "=== Memuat Daftar Tautan Paket LFS & Nginx ==="
+echo "=== Membuat Manifest wget-list-systemd ==="
 cat > wget-list-systemd << "EOF"
 https://download.savannah.gnu.org/releases/acl/acl-2.4.0.tar.xz
 https://download.savannah.gnu.org/releases/attr/attr-2.6.0.tar.gz
@@ -75,14 +76,18 @@ https://distfiles.ariadne.space/pkgconf/pkgconf-3.0.5.tar.xz
 https://sourceforge.net/projects/procps-ng/files/Production/procps-ng-4.0.7.tar.xz
 https://sourceforge.net/projects/psmisc/files/psmisc/psmisc-23.7.tar.xz
 https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz
+https://www.python.org/ftp/python/doc/3.14.7/python-3.14.7-docs-html.tar.bz2
 https://ftpmirror.gnu.org/readline/readline-8.3.tar.gz
 https://ftpmirror.gnu.org/sed/sed-4.10.tar.xz
 https://pypi.org/packages/source/s/setuptools/setuptools-84.0.0.tar.gz
 https://github.com/shadow-maint/shadow/releases/download/4.20.2/shadow-4.20.2.tar.xz
 https://sqlite.org/2026/sqlite-autoconf-3530400.tar.gz
+https://sqlite.org/2026/sqlite-doc-3530400.zip
 https://github.com/systemd/systemd/archive/v261.2/systemd-261.2.tar.gz
+https://anduin.linuxfromscratch.org/LFS/systemd-man-pages-261.2.tar.xz
 https://ftpmirror.gnu.org/tar/tar-1.35.tar.xz
 https://downloads.sourceforge.net/tcl/tcl8.6.18-src.tar.gz
+https://downloads.sourceforge.net/tcl/tcl8.6.18-html.tar.gz
 https://ftpmirror.gnu.org/texinfo/texinfo-7.3.tar.xz
 https://www.iana.org/time-zones/repository/releases/tzdata2026c.tar.gz
 https://www.kernel.org/pub/linux/utils/util-linux/v2.42/util-linux-2.42.2.tar.xz
@@ -91,13 +96,21 @@ https://pypi.org/packages/source/w/wheel/wheel-0.48.0.tar.gz
 https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.xz
 https://zlib.net/fossils/zlib-1.3.2.tar.gz
 https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz
+https://www.linuxfromscratch.org/patches/lfs/13.1/bzip2-1.0.8-install_docs-1.patch
+https://www.linuxfromscratch.org/patches/lfs/13.1/coreutils-9.11-i18n-1.patch
+https://www.linuxfromscratch.org/patches/lfs/13.1/expect-5.45.4-gcc15-1.patch
+https://www.linuxfromscratch.org/patches/lfs/13.1/glibc-2.44-upstream_fixes-1.patch
+https://www.linuxfromscratch.org/patches/lfs/13.1/glibc-fhs-1.patch
+https://www.linuxfromscratch.org/patches/lfs/13.1/kbd-2.10.0-backspace-1.patch
+https://www.linuxfromscratch.org/patches/lfs/13.1/Python-3.14.7-openssl_4-1.patch
+https://www.linuxfromscratch.org/patches/lfs/13.1/tar-1.35-acl_fix-1.patch
 https://nginx.org/download/nginx-1.26.2.tar.gz
 EOF
 
-echo "=== Memulai Pengunduhan Seluruh Berkas ==="
+echo "=== Mengunduh Seluruh Paket ==="
 wget --input-file=wget-list-systemd --continue --directory-prefix=$LFS/sources
 
-echo "=== Mengatur Kepemilikan Berkas ke root:root ==="
+echo "=== Mengatur Kepemilikan Ke root:root ==="
 chown -v root:root $LFS/sources/*
 
-echo "=== Pengunduhan Berkas Selesai Ditangani ==="
+echo "=== Bab 3 Selesai ==="
