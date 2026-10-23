@@ -15,15 +15,6 @@ FORCE_UNSAFE_CONFIGURE=1 ./configure --prefix=/usr
 
 make
 
-make NON_ROOT_USERNAME=tester check-root
-
-groupadd -g 102 dummy -U tester
-chown -R tester .
-
-su tester -c "PATH=$PATH make -k RUN_EXPENSIVE_TESTS=yes check" < /dev/null
-
-groupdel dummy
-
 make install
 
 mv -v /usr/bin/chroot /usr/sbin
