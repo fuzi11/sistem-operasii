@@ -54,3 +54,116 @@
 - Parallel Build: Enabled `MAKEFLAGS=-j$(nproc)` for multi-core compilation
 
 
+## Dokumentasi Bab 5.2 - Binutils-2.47 (Pass 1)
+- Storage Directory: `$LFS/sources`
+- Build Directory: `$LFS/sources/binutils-2.47/build`
+- Target Directory: `$LFS/tools`
+- Target Architecture: `$LFS_TGT`
+- Primary Artifacts: Cross-linker (`ld`) dan cross-assembler (`as`) awal
+
+## Dokumentasi Bab 5.3 - GCC-16.2.0 (Pass 1)
+- Embedded Packages: `mpfr-4.2.2`, `gmp-6.3.0`, `mpc-1.4.1`
+- Target Directory: `$LFS/tools`
+- Architecture Fix: Sed patch pada `gcc/config/i386/t-linux64` untuk mengubah `lib64` ke `lib`
+- Primary Artifacts: Cross-compiler C (`$LFS_TGT-gcc`) dan `libgcc` awal
+
+## Dokumentasi Bab 5.4 - Linux API Headers
+- Source Directory: `$LFS/sources/linux-6.x`
+- Target Directory: `$LFS/usr/include`
+- Pre-clean: `make mrproper`
+- Primary Artifacts: Header kernel ter-sanitasi untuk antarmuka Glibc
+
+## Dokumentasi Bab 5.5 - Glibc-2.44
+- Target Directory: `$LFS/usr`
+- Cross Compiler Used: `$LFS_TGT-gcc`
+- Symlink Fix: Pengaturan direktori dasar FHS di `$LFS/usr`
+- Primary Artifacts: Pustaka C standar sistem (libc, libm, libpthread)
+
+## Dokumentasi Bab 5.6 - Libstdc++ from GCC-16.2.0
+- Target Directory: `$LFS/usr`
+- Build Directory: `$LFS/sources/gcc-16.2.0/build`
+- Cleanup Status: Menghapus berkas pustaka `libstdc++.la`, `libstdc++fs.la`, dan `libsupc++.la`
+- Primary Artifacts: Pustaka standar C++ untuk lingkungan temporary tools
+
+*Bab 5 (Compiling a Cross-Toolchain) Selesai sepenuhnya.*
+
+## Dokumentasi Bab 6.2 - M4-1.4.21
+- Target Directory: `$LFS/usr`
+- Environment Config: Pembuatan `$LFS/usr/share/config.site` untuk variabel `posix_spawn` glibc-2.44
+- Execution Option: `--host=$LFS_TGT --build=$(build-aux/config.guess)`
+
+## Dokumentasi Bab 6.3 - Ncurses-6.6
+- Target Directory: `$LFS/usr`
+- Host Tool Built: Program `tic` sementara dikompilasi di folder `build` dan dipasang ke `$LFS/tools/bin`
+- Compatibility Fixes: Symlink `libncurses.so` -> `libncursesw.so` dan patch macro `curses.h`
+
+## Dokumentasi Bab 6.4 - Bash-5.3
+- Target Directory: `$LFS/usr`
+- Configuration Option: `--without-bash-malloc` (menghindari segfault dengan memakai Glibc malloc)
+- Shell Link: Symlink `$LFS/bin/sh` -> `bash`
+
+## Dokumentasi Bab 6.5 - Coreutils-9.11
+- Target Directory: `$LFS/usr`
+- Configuration Option: `--enable-install-program=hostname`
+- Path Adjustments: Memindahkan biner `chroot` ke `/usr/sbin` dan manpage `chroot.1` ke section 8
+
+## Dokumentasi Bab 6.6 - Diffutils-3.12
+- Target Directory: `$LFS/usr`
+- Cross Fix: Override `gl_cv_func_strcasecmp_works=yes` untuk melewati pengecekan run-time cross-compilation
+
+## Dokumentasi Bab 6.7 - File-5.48
+- Target Directory: `$LFS/usr`
+- Temporary Tool Built: Program `file` versi host dikompilasi di folder `build` untuk pembuatan berkas signature
+- Cleanup Status: Menghapus `$LFS/usr/lib/libmagic.la`
+
+## Dokumentasi Bab 6.8 - Findutils-4.11.0
+- Target Directory: `$LFS/usr`
+- Configuration Option: `--localstatedir=/var/lib/locate`
+
+## Dokumentasi Bab 6.9 - Gawk-5.4.1
+- Target Directory: `$LFS/usr`
+- Source Fix: Penyesuaian `sed` pada `Makefile.in` untuk menghapus direktori `extras`
+
+## Dokumentasi Bab 6.10 - Grep-3.12
+- Target Directory: `$LFS/usr`
+- Build Options: Cross-compilation standar menggunakan `--host=$LFS_TGT`
+
+## Dokumentasi Bab 6.11 - Gzip-1.14
+- Target Directory: `$LFS/usr`
+- Build Options: Cross-compilation standar menggunakan `--host=$LFS_TGT`
+
+## Dokumentasi Bab 6.12 - Make-4.4.1
+- Target Directory: `$LFS/usr`
+- Build Options: Cross-compilation standar menggunakan `--host=$LFS_TGT`
+
+## Dokumentasi Bab 6.13 - Patch-2.8
+- Target Directory: `$LFS/usr`
+- Build Options: Cross-compilation standar menggunakan `--host=$LFS_TGT`
+
+## Dokumentasi Bab 6.14 - Sed-4.10
+- Target Directory: `$LFS/usr`
+- Build Options: Cross-compilation standar menggunakan `--host=$LFS_TGT`
+
+## Dokumentasi Bab 6.15 - Tar-1.35
+- Target Directory: `$LFS/usr`
+- Build Options: Cross-compilation standar menggunakan `--host=$LFS_TGT`
+
+## Dokumentasi Bab 6.16 - Xz-5.8.3
+- Target Directory: `$LFS/usr`
+- Configuration Options: `--disable-static` dan `--docdir=/usr/share/doc/xz-5.8.3`
+- Cleanup Status: Menghapus `$LFS/usr/lib/liblzma.la`
+
+## Dokumentasi Bab 6.17 - Binutils-2.47 (Pass 2)
+- Target Directory: `$LFS/usr`
+- Source Patch: Modified `ltmain.sh` baris 6031 untuk mencegah kontaminasi pustaka host
+- Build Options: `--enable-shared`, `--enable-64-bit-bfd`, `--enable-new-dtags`, `--enable-default-hash-style=gnu`
+- Cleanup Status: Menghapus pustaka statis dan libtool archive (`lib{bfd,ctf,ctf-nobfd,opcodes,sframe}.{a,la}`)
+
+## Dokumentasi Bab 6.18 - GCC-16.2.0 (Pass 2)
+- Embedded Packages: Re-extracted `mpfr`, `gmp`, dan `mpc` ke dalam pohon sumber GCC
+- Target Directory: `$LFS/usr`
+- Configuration Options: `--with-build-sysroot=$LFS`, `--enable-default-pie`, `--enable-default-ssp`, `--enable-languages=c,c++`
+- Environment Overrides: `CXX_FOR_TARGET="$LFS_TGT-gcc -nostdinc++"`, `LDFLAGS_FOR_TARGET=-L$PWD/$LFS_TGT/libgcc`
+- Utility Link: Symlink `$LFS/usr/bin/cc` -> `gcc`
+
+*Bab 6 (Cross Compiling Temporary Tools) Selesai sepenuhnya.*

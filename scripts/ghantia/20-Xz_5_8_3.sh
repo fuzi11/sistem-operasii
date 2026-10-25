@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+cd $LFS/sources
+tar -xf xz-*.tar.*
+cd xz-*
+
+./configure --prefix=/usr                     \
+            --host=$LFS_TGT                   \
+            --build=$(build-aux/config.guess) \
+            --disable-static                  \
+            --docdir=/usr/share/doc/xz-5.8.3
+
+make
+make DESTDIR=$LFS install
+
+rm -v $LFS/usr/lib/liblzma.la
+
+cd $LFS/sources
+rm -rf xz-*

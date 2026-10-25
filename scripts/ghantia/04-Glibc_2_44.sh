@@ -2,7 +2,7 @@
 #!/bin/bash
 set -e
 
-cd /sources
+cd $LFS/sources
 tar -xf glibc-2.44.tar.xz
 cd glibc-2.44
 

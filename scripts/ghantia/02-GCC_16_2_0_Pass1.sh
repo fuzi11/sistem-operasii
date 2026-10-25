@@ -2,7 +2,7 @@
 #!/bin/bash
 set -e
 
-cd /sources
+cd $LFS/sources
 tar -xf gcc-16.2.0.tar.xz
 cd gcc-16.2.0
 
@@ -12,7 +12,7 @@ mv -v mpfr-4.2.2 mpfr
 tar -xf ../gmp-6.3.0.tar.xz
 mv -v gmp-6.3.0 gmp
 
-tar -xf ../mpc-1.4.1.tar.gz
+tar -xf ../mpc-1.4.1.tar.xz
 mv -v mpc-1.4.1 mpc
 
 case $(uname -m) in
@@ -53,5 +53,5 @@ make install
 cat ../gcc/limitx.h ../gcc/glimits.h ../gcc/limity.h \
     > "$("$LFS_TGT-gcc" -print-file-name=include)/limits.h"
 
-cd /sources
+cd $LFS/sources
 rm -rf gcc-16.2.0

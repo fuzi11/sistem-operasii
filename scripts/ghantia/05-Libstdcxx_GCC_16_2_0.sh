@@ -2,7 +2,7 @@
 #!/bin/bash
 set -e
 
-cd /sources
+cd $LFS/sources
 tar -xf gcc-16.2.0.tar.xz
 cd gcc-16.2.0
 
