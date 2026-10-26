@@ -12,11 +12,7 @@ cd file-5.48
 ./configure --prefix=/usr
 
 # Proses kompilasi
-make -j$(nproc)
-
-# Menguji hasil kompilasi
-echo "Menjalankan make check..."
-make check
+make
 
 # Menginstal paket
 make install

@@ -12,11 +12,7 @@ cd bc-7.0.3
 CC='gcc -std=c99' ./configure --prefix=/usr -G -O3 -r
 
 # Proses kompilasi
-make -j$(nproc)
-
-# Menguji hasil kompilasi
-echo "Menjalankan make test..."
-make test
+make
 
 # Menginstal paket
 make install

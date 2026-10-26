@@ -29,7 +29,7 @@ patch -Np1 -i ../expect-5.45.4-gcc15-1.patch
             --with-tclinclude=/usr/include
 
 # Proses kompilasi
-make -j$(nproc)
+make
 
 # Menguji hasil kompilasi
 echo "Menjalankan make test..."

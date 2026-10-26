@@ -5,7 +5,7 @@ echo "Mulai kompilasi dan instalasi Zlib-1.3.2 (Bab 8.6)..."
 cd /sources
 
 # Mengekstrak kode sumber
-tar -xf zlib-1.3.2.tar.xz
+tar -xf zlib-1.3.2.tar.gz
 cd zlib-1.3.2
 
 # Konfigurasi Zlib

@@ -29,7 +29,7 @@ sed -e '270a\
             --docdir=/usr/share/doc/readline-8.3
 
 # Proses kompilasi (memaksa tautan ke libncursesw)
-make -j$(nproc) SHLIB_LIBS="-lncursesw"
+make SHLIB_LIBS="-lncursesw"
 
 # Menginstal paket (paket ini tidak memiliki test suite)
 make install

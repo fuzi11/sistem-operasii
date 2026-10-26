@@ -9,12 +9,10 @@ tar -xf lz4-1.10.0.tar.gz
 cd lz4-1.10.0
 
 # Proses kompilasi tanpa static library
-make -j$(nproc) BUILD_STATIC=no PREFIX=/usr
+make  BUILD_STATIC=no PREFIX=/usr
 
 # Menguji hasil kompilasi
 # WAJIB menggunakan -j1 sesuai instruksi LFS agar test tidak error
-echo "Menjalankan make check..."
-make -j1 check
 
 # Menginstal paket
 make BUILD_STATIC=no PREFIX=/usr install

@@ -5,7 +5,7 @@ echo "Mulai kompilasi mpdecimal-4.0.1..."
 cd /sources
 
 # Mengekstrak kode sumber
-tar -xf mpdecimal-4.0.1.tar.xz
+tar -xf mpdecimal-4.0.1.tar.gz
 cd mpdecimal-4.0.1
 
 # Konfigurasi mpdecimal

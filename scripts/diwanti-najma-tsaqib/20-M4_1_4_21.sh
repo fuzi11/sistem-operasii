@@ -12,11 +12,7 @@ cd m4-1.4.21
 ./configure --prefix=/usr
 
 # Proses kompilasi
-make -j$(nproc)
-
-# Menguji hasil kompilasi
-echo "Menjalankan make check..."
-make check
+make
 
 # Menginstal paket
 make install

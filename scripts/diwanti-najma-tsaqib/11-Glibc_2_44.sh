@@ -31,7 +31,7 @@ make -j$(nproc)
 # Catatan: Karena beberapa test mungkin gagal (timeout/bergantung pada host) dan memicu 'set -e',
 # kita tambahkan '|| true' agar kegagalan sebagian test tidak langsung menghentikan skrip.
 echo "Menjalankan make check..."
-make check || true
+make check
 
 # Mencegah peringatan karena /etc/ld.so.conf belum ada
 touch /etc/ld.so.conf

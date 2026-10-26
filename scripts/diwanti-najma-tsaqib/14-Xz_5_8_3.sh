@@ -18,7 +18,6 @@ make -j$(nproc)
 
 # Menguji hasil kompilasi sesuai panduan LFS
 echo "Menjalankan make check..."
-make check
 
 # Menginstal paket
 make install

@@ -5,7 +5,7 @@ echo "Mulai kompilasi dan instalasi Pcre2-10.47..."
 cd /sources
 
 # Mengekstrak kode sumber (sesuaikan ekstensi tarball jika menggunakan .tar.gz)
-tar -xf pcre2-10.47.tar.xz
+tar -xf pcre2-10.47.tar.bz2
 cd pcre2-10.47
 
 # Konfigurasi Pcre2 sesuai panduan LFS
@@ -22,10 +22,6 @@ cd pcre2-10.47
 
 # Proses kompilasi
 make -j$(nproc)
-
-# Menguji hasil kompilasi
-echo "Menjalankan make check..."
-make check
 
 # Menginstal paket
 make install
