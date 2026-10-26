@@ -167,3 +167,127 @@
 - Utility Link: Symlink `$LFS/usr/bin/cc` -> `gcc`
 
 *Bab 6 (Cross Compiling Temporary Tools) Selesai sepenuhnya.*
+
+## Dokumentasi Bab 7.2 - Changing Ownership
+- Target Directory: `$LFS`
+- Execution Environment: Host OS (`root`)
+- Ownership Command: `chown --from lfs -R root:root $LFS/{usr,var,etc,tools}`
+- Architecture Rule: Tidak membuat atau mengubah direktori `lib64` untuk menjaga konsistensi arsitektur 64-bit murni
+
+## Dokumentasi Bab 7.3 - Preparing Virtual Kernel File Systems
+- Target Mount Points: `$LFS/{dev,proc,sys,run}`
+- Host Device Binding: `mount -v --bind /dev $LFS/dev`
+- Virtual Filesystems: `devpts` (`gid=5,mode=0620`), `proc`, `sysfs`, dan `tmpfs` (`/run`)
+- Shared Memory Setup: Memasang `tmpfs` pada `$LFS/dev/shm` (`nosuid,nodev`) atau direktori berizin `1777`
+
+## Dokumentasi Bab 7.4 - Entering the Chroot Environment
+- Execution Command: `chroot "$LFS" /usr/bin/env -i HOME=/root TERM="$TERM" PS1='(lfs chroot) \u:\w\$ ' PATH=/usr/bin:/usr/sbin MAKEFLAGS="-j$(nproc)" TESTSUITEFLAGS="-j$(nproc)" /bin/bash --login`
+- Environment Isolation: Membersihkan seluruh variabel lingkungan host (`-i`) dan membatasi akses pada direktori `$LFS`
+- Initial Prompt: `(lfs chroot) I have no name!:/#` (sebelum pembentukan `/etc/passwd`)
+
+## Dokumentasi Bab 7.5 - Creating Directories
+- Target Directory: Root chroot (`/`)
+- Directory Tree: Membuat struktur FHS standar (`/{boot,home,mnt,opt,srv}`, `/etc/{opt,sysconfig}`, `/usr/{,local/}{include,src}`, `/var/{cache,local,log,mail,opt,spool}`, dll.)
+- Symbolic Links: `ln -sfv /run /var/run` dan `ln -sfv /run/lock /var/lock`
+- Special Permissions: Permisi `0750` untuk `/root` dan sticky bit `1777` untuk `/tmp` serta `/var/tmp`
+- Warning Rule: Dilarang keras membuat direktori `/usr/lib64`
+
+## Dokumentasi Bab 7.6 - Creating Essential Files & Symlinks
+- Mount Link: Symlink `/proc/self/mounts` ke `/etc/mtab`
+- Essential Files: Membuat `/etc/hosts`, `/etc/passwd`, dan `/etc/group` dasar
+- Testing Account: Menambahkan akun `tester` (`UID:101, GID:101`) beserta direktori `/home/tester`
+- Shell Refresh: Eksekusi `exec /usr/bin/bash --login` untuk memperbarui resolusi user prompt menjadi `root`
+- Log Files Setup: Inisialisasi `/var/log/{btmp,lastlog,faillog,wtmp}` dengan kepemilikan grup `utmp`
+
+## Dokumentasi Bab 7.7 - Gettext-1.0
+- Target Directory: `/usr`
+- Script Name: `01-Gettext_1_0.sh`
+- Configuration Options: `--disable-shared`
+- Purpose: Menyediakan utilitas internasionalisasi dan penerjemahan pesan awal di lingkungan chroot
+
+## Dokumentasi Bab 7.8 - Bison-3.8.2
+- Target Directory: `/usr`
+- Script Name: `02-Bison_3_8_2.sh`
+- Configuration Options: `--docdir=/usr/share/doc/bison-3.8.2`
+- Purpose: Menyediakan generator parser LALR(1) untuk paket-paket berikutnya
+
+## Dokumentasi Bab 7.9 - Perl-5.44.0
+- Target Directory: `/usr`
+- Script Name: `03-Perl_5_44_0.sh`
+- Configuration Options: `-des -Dprefix=/usr -Dvendorprefix=/usr -Duseshrplib`
+- Purpose: Bahasa pemrograman skrip esensial untuk pembangunan paket dan test suite
+
+## Dokumentasi Bab 7.10 - Zlib-1.3.2
+- Target Directory: `/usr`
+- Script Name: `04-Zlib_1_3_2.sh`
+- Build Artifacts: Pustaka statis (`libz.a`) dan dinamis (`libz.so.1.3.2`)
+- Purpose: Menyediakan pustaka kompresi dan dekompresi data dasar
+
+## Dokumentasi Bab 7.11 - mpdecimal-4.0.1
+- Target Directory: `/usr`
+- Script Name: `05-mpdecimal_4_0_1.sh`
+- Configuration Options: `--disable-cxx`
+- Purpose: Pustaka aritmatika desimal presisi tinggi yang dibutuhkan oleh Python
+
+## Dokumentasi Bab 7.12 - Python-3.14.7
+- Target Directory: `/usr`
+- Script Name: `06-Python_3_14_7.sh`
+- Configuration Options: `--enable-shared --with-system-expat --without-ensurepip`
+- Purpose: Interpreter Python dasar untuk utilitas sistem dan proses kompilasi lanjutan
+
+## Dokumentasi Bab 7.13 - Texinfo-7.3
+- Target Directory: `/usr`
+- Script Name: `07-Texinfo_7_3.sh`
+- Verification Command: `makeinfo --version`
+- Purpose: Sistem pembuatan dan pembaca dokumentasi info GNU
+
+## Dokumentasi Bab 7.14 - Util-linux-2.42.2
+- Target Directory: `/usr`
+- Script Name: `08-Util_linux_2_42_2.sh`
+- Configuration Options: `--disable-chfn-chsh --disable-login --disable-nologin --disable-su --disable-setpriv --disable-runuser --disable-pylibmount --without-python`
+- Purpose: Kumpulan utilitas dasar sistem Linux (mount, fdisk, fsck, dll.)
+
+## Dokumentasi Bab 7.15 - Man-pages-6.18
+- Target Directory: `/usr`
+- Script Name: `09-Man_pages_6_18.sh`
+- Installation Method: `make prefix=/usr install`
+- Purpose: Dokumentasi halaman manual (man pages) standar untuk sistem Linux
+
+## Dokumentasi Bab 7.16 - Iana-Etc-20260805
+- Target Directory: `/etc`
+- Script Name: `10-Iana_Etc_20260805.sh`
+- Target Files: `/etc/protocols` dan `/etc/services`
+- Purpose: Menyediakan data referensi layanan jaringan dan protokol IANA
+
+## Dokumentasi Bab 7.17 - Glibc-2.44
+- Target Directory: `/usr`
+- Script Name: `11-Glibc_2_44.sh`
+- Configuration Options: `--host=$LFS_TGT --build=$(../scripts/config.guess) --enable-kernel=4.19 --with-headers=/usr/include`
+- Purpose: Pustaka C standar utama untuk seluruh aplikasi sistem LFS
+
+## Dokumentasi Bab 7.18 - Bzip2-1.0.8
+- Target Directory: `/usr`
+- Script Name: `13-Bzip2_1_0_8.sh`
+- Build Options: Menggunakan `Makefile-libbz2_so` untuk pembuatan shared library
+- Purpose: Pustaka dan utilitas kompresi blok bzip2
+
+## Dokumentasi Bab 7.19 - Xz-5.8.3
+- Target Directory: `/usr`
+- Script Name: `14-Xz_5_8_3.sh`
+- Configuration Options: `--disable-static --docdir=/usr/share/doc/xz-5.8.3`
+- Purpose: Pustaka kompresi LZMA/XZ untuk mendukung paket berarsip `.tar.xz`
+
+## Dokumentasi Bab 7.20 - Lz4-1.10.0
+- Target Directory: `/usr`
+- Script Name: `15-Lz4_1_10_0.sh`
+- Build Options: `BUILD_STATIC=no PREFIX=/usr`
+- Purpose: Kompresi data berkecepatan tinggi yang dibutuhkan oleh perkakas sistem modern
+
+## Dokumentasi Bab 7.21 - Cleaning up and Saving the Temporary System
+- Documentation Cleanup: Menghapus dokumentasi sementara via `rm -rf /usr/share/{info,man,doc}/*`
+- Libtool Cleanup: Menghapus berkas `.la` via `find /usr/{lib,libexec} -name \*.la -delete`
+- Tools Removal: Menghapus direktori temporary tools `/tools` (`rm -rf /tools`)
+- Chroot Exit & Unmount: Exit chroot dan melepaskan virtual filesystems di Host OS (`umount $LFS/dev/pts`, dll.)
+- Backup Archive: Membuat arsip cadangan `lfs-temp-tools-13.1-systemd.tar.xz` di direktori home root host
+
+*Bab 7 (Entering Chroot and Building Additional Temporary Tools) Selesai sepenuhnya.*
