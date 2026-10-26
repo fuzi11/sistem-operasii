@@ -13,7 +13,7 @@ cd gettext-1.0
 ./configure --disable-shared
 
 # Proses kompilasi (menggunakan 4 core CPU sesuai kesepakatan)
-make $nproc
+make -j$(nproc)
 
 # Menginstal hanya 3 program yang dibutuhkan untuk fase ini
 cp -v gettext-tools/src/{msgfmt,msgmerge,xgettext} /usr/bin
