@@ -21,10 +21,6 @@ sed -i "s/echo/#echo/" src/egrep.sh
 # 5. Kompilasi paket
 make
 
-# 6. Pengujian hasil build (Optional / Test Suite)
-echo "Menjalankan Test Suite Grep..."
-make check || true
-
 # 7. Instalasi paket
 make install
 

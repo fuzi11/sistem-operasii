@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -11,11 +10,10 @@ cd build
 
 meson setup --prefix=/usr \
             --buildtype=release \
-            -D manpages=false ..
+            -D manpages=false
 
 ninja
 ninja install
 
 cd /sources
 rm -rf kmod-34.2
-```

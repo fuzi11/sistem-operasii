@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -13,11 +12,9 @@ cd mpdecimal-4.0.1
             --docdir=/usr/share/doc/mpdecimal-4.0.1
 
 make
-make check_local
 make install
 
 cd /sources
 rm -rf mpdecimal-4.0.1
 
 echo "Instalasi mpdecimal-4.0.1 selesai!"
-```

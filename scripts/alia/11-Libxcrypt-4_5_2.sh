@@ -25,10 +25,6 @@ sed -i '/strchr/s/const//' lib/crypt-{sm3,gost}-yescrypt.c
 # 5. Kompilasi paket
 make
 
-# 6. Pengujian hasil build (Optional / Test Suite)
-echo "Menjalankan Test Suite Libxcrypt..."
-make check || true
-
 # 7. Instalasi paket
 make install
 

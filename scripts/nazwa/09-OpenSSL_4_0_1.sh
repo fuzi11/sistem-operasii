@@ -5,7 +5,10 @@ cd /sources
 tar -xf openssl-4.0.1.tar.gz
 cd openssl-4.0.1
 
-./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib shared zlib-dynamic
+./config --prefix=/usr \
+    --openssldir=/etc/ssl \
+    --libdir=lib \
+    shared zlib-dynamic
 make
 make INSTALL_LIBS= MANSUFFIX=ssl install
 

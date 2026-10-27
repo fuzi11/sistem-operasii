@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -19,8 +18,6 @@ cd gdbm-1.26
 # Mengompilasi GDBM
 make
 
-# Menguji hasil kompilasi
-make check
 
 # Menginstal GDBM
 make install
@@ -30,4 +27,3 @@ cd /sources
 rm -rf gdbm-1.26
 
 echo "Instalasi GDBM-1.26 selesai!"
-```

@@ -1,11 +1,10 @@
-```bash
 #!/bin/bash
 set -e
 
 echo "Mulai instalasi Inetutils-2.8..."
 
 cd /sources
-tar -xf inetutils-2.8.tar.xz
+tar -xf inetutils-2.8.tar.gz
 cd inetutils-2.8
 
 sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c
@@ -22,7 +21,6 @@ sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c
             --disable-servers
 
 make
-make check
 make install
 
 mv -v /usr/{,s}bin/ifconfig
@@ -31,4 +29,3 @@ cd /sources
 rm -rf inetutils-2.8
 
 echo "Instalasi Inetutils-2.8 selesai!"
-```

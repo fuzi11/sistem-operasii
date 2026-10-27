@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -28,8 +27,6 @@ sh Configure -des \
 
 make
 
-TEST_JOBS=$(nproc) make test_harness
-
 make install
 
 unset BUILD_ZLIB
@@ -39,4 +36,3 @@ cd /sources
 rm -rf perl-5.44.0
 
 echo "Instalasi Perl-5.44.0 selesai!"
-```

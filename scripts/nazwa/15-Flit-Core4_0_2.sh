@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -15,4 +14,3 @@ cd /sources
 rm -rf flit_core-4.0.2
 
 echo "Instalasi Flit-Core-4.0.2 selesai!"
-```

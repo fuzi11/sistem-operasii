@@ -2,7 +2,7 @@
 set -e
 
 cd /sources
-tar -xf autoconf-2.73.tar.xz
+tar -xf autoconf-2.73.tar.gz
 cd autoconf-2.73
 
 ./configure --prefix=/usr

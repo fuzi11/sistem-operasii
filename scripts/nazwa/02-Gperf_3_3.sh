@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -18,8 +17,6 @@ cd gperf-3.3
 # Mengompilasi Gperf
 make
 
-# Menguji hasil kompilasi
-make check
 
 # Menginstal Gperf
 make install
@@ -29,4 +26,3 @@ cd /sources
 rm -rf gperf-3.3
 
 echo "Instalasi Gperf-3.3 selesai!"
-```

@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -11,4 +10,3 @@ pip3 install --no-index --find-links dist wheel
 
 cd /sources
 rm -rf wheel-0.48.0
-```

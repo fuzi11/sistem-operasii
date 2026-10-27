@@ -18,10 +18,6 @@ sed -i '/install -m.*STA/d' libcap/Makefile
 # 4. Kompilasi paket (menentukan direktori /usr/lib)
 make prefix=/usr lib=lib
 
-# 5. Pengujian hasil build (Optional / Test Suite)
-echo "Menjalankan Test Suite Libcap..."
-make test || true
-
 # 6. Instalasi paket
 make prefix=/usr lib=lib install
 

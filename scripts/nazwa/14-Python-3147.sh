@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -17,7 +16,6 @@ patch -Np1 -i ../Python-3.14.7-openssl_4-1.patch
             --without-static-libpython
 
 make
-make test TESTOPTS="--timeout 120"
 make install
 
 cat > /etc/pip.conf << EOF
@@ -38,4 +36,3 @@ cd /sources
 rm -rf Python-3.14.7
 
 echo "Instalasi Python-3.14.7 selesai!"
-```

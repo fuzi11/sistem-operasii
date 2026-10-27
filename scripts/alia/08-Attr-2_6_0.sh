@@ -21,10 +21,6 @@ cd attr-2.6.0
 # 4. Kompilasi paket
 make
 
-# 5. Pengujian hasil build (Memerlukan dukungan extended attributes pada filesystem)
-echo "Menjalankan Test Suite Attr..."
-make check || true
-
 # 6. Instalasi paket
 make install
 

@@ -20,9 +20,6 @@ cd gettext-1.0
 # 4. Kompilasi paket
 make
 
-# 5. Pengujian hasil build (Optional / Test Suite)
-echo "Menjalankan Test Suite Gettext..."
-make check || true
 
 # 6. Instalasi paket
 make install

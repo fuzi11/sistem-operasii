@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -28,4 +27,3 @@ cd /sources
 rm -rf sqlite-autoconf-3530400
 
 echo "Instalasi Sqlite-3530400 selesai!"
-```

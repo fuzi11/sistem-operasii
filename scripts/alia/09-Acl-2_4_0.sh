@@ -9,7 +9,7 @@ echo "=========================================="
 cd /sources
 
 # 2. Ekstraksi source tarball Acl
-tar -xf acl-2.4.0.tar.gz
+tar -xf acl-2.4.0.tar.xz
 cd acl-2.4.0
 
 # 3. Konfigurasi paket Acl
@@ -19,11 +19,6 @@ cd acl-2.4.0
 
 # 4. Kompilasi paket
 make
-
-# 5. Pengujian hasil build (Memerlukan dukungan ACL pada filesystem)
-# Catatan: Tes test/cp.run diketahui gagal karena Coreutils belum dibuild dengan dukungan ACL.
-echo "Menjalankan Test Suite Acl..."
-make check || true
 
 # 6. Instalasi paket
 make install

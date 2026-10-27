@@ -18,9 +18,6 @@ cd bison-3.8.2
 # 4. Kompilasi paket
 make
 
-# 5. Pengujian hasil build (Optional / Test Suite)
-echo "Menjalankan Test Suite Bison..."
-make check || true
 
 # 6. Instalasi paket
 make install

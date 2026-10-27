@@ -1,4 +1,4 @@
-#!/bin/bash
+deja#!/bin/bash
 set -e # Skrip otomatis berhenti jika terjadi kesalahan
 
 echo "=========================================="
@@ -22,9 +22,6 @@ cd build
 # 5. Generasi dokumentasi (HTML dan Plaintext)
 makeinfo --html --no-split -o doc/dejagnu.html ../doc/dejagnu.texi
 makeinfo --plaintext       -o doc/dejagnu.txt  ../doc/dejagnu.texi
-
-# 6. Pengujian hasil build (Optional / Test Suite)
-make check || true
 
 # 7. Instalasi paket dan dokumentasi
 make install

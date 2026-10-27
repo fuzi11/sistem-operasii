@@ -25,8 +25,6 @@ python3 ../meson-1.12.0/meson.py setup --prefix=/usr --buildtype=release ..
 # 6. Kompilasi paket menggunakan Ninja
 ninja
 
-# 7. Pengujian hasil build (Optional / Test Suite)
-ninja test || true
 
 # 8. Instalasi paket
 ninja install

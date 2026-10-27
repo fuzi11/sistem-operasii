@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -23,4 +22,3 @@ sed -i 's/"1"/"8"/' /usr/share/man/man8/chroot.8
 
 cd /sources
 rm -rf coreutils-9.11
-```

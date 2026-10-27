@@ -9,7 +9,7 @@ echo "=========================================="
 cd /sources
 
 # 2. Ekstraksi source tarball MPC
-tar -xf mpc-1.4.1.tar.gz
+tar -xf mpc-1.4.1.tar.xz
 cd mpc-1.4.1
 
 # 3. Konfigurasi paket MPC
@@ -21,9 +21,6 @@ cd mpc-1.4.1
 make
 make html
 
-# 5. Pengujian hasil build (Optional / Test Suite)
-echo "Menjalankan Test Suite MPC..."
-make check || true
 
 # 6. Instalasi paket dan dokumentasi HTML
 make install

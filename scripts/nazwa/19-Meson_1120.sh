@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -17,4 +16,3 @@ install -vDm644 data/shell-completions/zsh/_meson \
 
 cd /sources
 rm -rf meson-1.12.0
-```

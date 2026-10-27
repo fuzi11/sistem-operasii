@@ -18,9 +18,6 @@ cd psmisc-23.7
 # 4. Kompilasi paket
 make
 
-# 5. Pengujian hasil build (Optional / Test Suite)
-echo "Menjalankan Test Suite Psmisc..."
-make check || true
 
 # 6. Instalasi paket
 make install

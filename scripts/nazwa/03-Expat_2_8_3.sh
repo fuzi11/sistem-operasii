@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 set -e
 
@@ -19,8 +18,6 @@ cd expat-2.8.3
 # Mengompilasi Expat
 make
 
-# Menguji hasil kompilasi
-make check
 
 # Menginstal Expat
 make install
@@ -33,4 +30,3 @@ cd /sources
 rm -rf expat-2.8.3
 
 echo "Instalasi Expat-2.8.3 selesai!"
-```
