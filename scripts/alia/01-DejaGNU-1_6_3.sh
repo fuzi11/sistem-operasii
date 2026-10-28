@@ -1,4 +1,4 @@
-deja#!/bin/bash
+#!/bin/bash
 set -e # Skrip otomatis berhenti jika terjadi kesalahan
 
 echo "=========================================="
