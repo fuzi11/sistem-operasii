@@ -291,3 +291,80 @@
 - Backup Archive: Membuat arsip cadangan `lfs-temp-tools-13.1-systemd.tar.xz` di direktori home root host
 
 *Bab 7 (Entering Chroot and Building Additional Temporary Tools) Selesai sepenuhnya.*
+
+# LFS 13.1 - Dokumentasi Chapter 8: Installing Basic System Software
+
+**Sistem Target:** Linux From Scratch 13.1 (x86_64)  
+**Lingkungan Build:** Chroot Environment (`/mnt/lfs`)  
+**Metode Eksekusi:** Skrip Otomasi Bash Sekuensial  
+**Strategi Optimasi:** Kompilasi Paralel (`make -j$(nproc)`), Pengabaian Test Suite (`make check`) demi Kecepatan, dan Pembersihan Manual Direktori Sumber (`/sources`).
+
+---
+
+## 1. Ringkasan Eksekusi & Konfigurasi Utama
+
+Seluruh pustaka dasar, perkakas kompilasi, utilitas sistem, *bootloader*, serta *init system* pada Bab 8 telah berhasil dibangun dan terpasang dengan bersih di dalam lingkungan chroot.
+
+* **Keamanan Toolchain:** GCC 16.2.0 dibangun menggunakan proteksi *Address Space Layout Randomization* (`--enable-default-pie`) dan *Stack Smashing Protection* (`--enable-default-ssp`).
+* **Sistem Bootloader Ganda:** GRUB 2.14 dikompilasi dua kali untuk mendukung arsitektur **BIOS (i386-pc)** dan **64-bit UEFI (x86_64-efi)** sekaligus.
+* **Init System & Logging:** Systemd 261.2 dikonfigurasi dengan penyiapan awal `systemd-machine-id-setup` serta penataan unit layanan awal via `systemctl preset-all`.
+* **Kepatuhan FHS:** Penyesuaian lokasi biner dilakukan pada beberapa paket, seperti pemindahan biner `chroot` ke `/usr/sbin` pada Coreutils.
+
+---
+
+## 2. Daftar Paket Utama yang Terpasang
+
+| Nama Paket | Versi | Status | Catatan Ringkas Konfigurasi |
+| :--- | :--- | :--- | :--- |
+| **Glibc** | 2.44 | Selesai | Patch FHS & upstream fixes, bypass `test-installation.pl`, penyiapan locale dasar. |
+| **Libelf** | 0.195 | Selesai | Pustaka ELF terpasang (`libelf.so`), pustaka statis dihapus. |
+| **Kmod** | 34.2 | Selesai | Build via Meson/Ninja, *symlink* modul kernel (`modprobe`, `lsmod`, dll) terpasang. |
+| **Coreutils** | 9.11 | Selesai | Patch i18n, `FORCE_UNSAFE_CONFIGURE=1`, penyesuaian FHS untuk biner `chroot`. |
+| **MPFR** | 4.2.2 | Selesai | Opsi `--enable-thread-safe` aktif, dokumentasi HTML terpasang. |
+| **GCC** | 16.2.0 | Selesai | Dukungan C/C++, PIE & SSP aktif, *sanity check toolchain* LULUS 100%. |
+| **Bash** | 5.3 | Selesai | Menggunakan Readline sistem, `--without-bash-malloc`, terkonfirmasi aktif di chroot. |
+| **DejaGNU** | 1.6.3 | Selesai | Terpasang beserta dokumentasi HTML dan plaintext. |
+| **OpenSSL** | 4.0.1 | Selesai | Pustaka kriptografi utama sistem beserta berkas dokumentasi `.pod`. |
+| **GDBM / Gperf / Expat** | Various | Selesai | Seluruh pustaka pendukung terverifikasi dan siap digunakan. |
+| **Inetutils** | 2.8 | Selesai | Perkakas jaringan dasar (`ping`, `hostname`, dll) terpasang. |
+| **Less** | 704 | Selesai | *Pager* terminal terpasang. |
+| **GRUB** | 2.14 | Selesai | Kompilasi ganda untuk modul BIOS dan 64-bit UEFI. |
+| **Tar** | 1.35 | Selesai | Patch `acl_fix-1`, `FORCE_UNSAFE_CONFIGURE=1`, dokumentasi terpasang. |
+| **Texinfo** | 7.3 | Selesai | Perkakas dokumentasi info & komponen TeX terpasang. |
+| **Vim** | 9.2.1025 | Selesai | Konfigurasi `/etc/vimrc` siap pakai, *symlink* biner & man-pages `vi` dibuat. |
+| **Systemd** | 261.2 | Selesai | Aturan udev disesuaikan, man-pages diekstrak, `machine-id` tergenerasi. |
+| **E2fsprogs** | 1.47.4 | Selesai | Pustaka statis dibersihkan, pembaruan indeks `install-info` untuk `libext2fs`. |
+| **Jinja2** | 3.1.6 | Selesai | *Wheel* Python terpasang di `/usr/lib/python3.14/site-packages`. |
+
+---
+
+## 3. Hasil Sanity Check Toolchain (GCC & Dynamic Linker)
+
+Pengujian integrasi kompiler dan *dynamic linker* menyatakan bahwa sistem LFS dalam kondisi **sehat (healthy)**:
+1. **Dynamic Linker Interpreter:** Tepat mengarah ke `/usr/lib/ld-linux-x86-64.so.2`.
+2. **Startfile Checking:** Berkas `Scrt1.o`, `crti.o`, dan `crtn.o` berhasil ditemukan dari direktori `/usr/lib/`.
+3. **Header Search Path:** Berkas header dibaca dengan tepat dari `/usr/include` dan direktori internal GCC.
+4. **Linker Search Path:** Mencakup `/usr/lib` dan `/usr/x86_64-pc-linux-gnu/lib`.
+5. **C Library Linking:** Sukses melakukan pemetaan ke `/usr/lib/libc.so.6`.
+
+### Catatan Tambahan: Pembersihan Simbol Debug (Debugging Symbols)
+* **Konsep dasar:** Secara default, pustaka dan biner dikompilasi dengan bendera `-g` (debugging symbols) untuk keperluan pengujian memori dan nama variabel.
+* **Manfaat Stripping:** Menghapus simbol debug akan mereduksi ukuran sistem hingga 50%–80% tanpa mengganggu fungsi operasional biner.
+* **Relevansi Proyek:** Penghematan ruang disk ini sangat krusial untuk mengoptimalkan ukuran citra SquashFS dan berkas **Live ISO** akhir.
+
+### 8.84 Stripping (Pembersihan Simbol Debug)
+* **Tujuan Utama:** Menghapus simbol debug dan tabel simbol yang tidak diperlukan pada seluruh biner dan pustaka sistem (`/usr/bin`, `/usr/sbin`, `/usr/lib`).
+* **Hasil Penghematan:** Memangkas ukuran sistem hingga **~2 GB**, yang sangat berdampak pada efisiensi ukuran citra SquashFS dan pembuatan **Live ISO**.
+* **Mekanisme Keamanan Process:** Biner/pustaka aktif seperti `bash`, `find`, `strip`, dan `libc.so.6` dikopi terlebih dahulu ke `/tmp` sebelum di-*strip* dan diinstal ulang untuk mencegah sistem *crash*.
+* **Pengawetan Simbol Debug:** Simbol debug pustaka kritis (Glibc & GCC) dikompresi menggunakan Zstd dan disimpan sebagai berkas `.dbg` terpisah untuk keperluan analisis *regression test* di BLFS.
+
+8.85 Cleaning Up
+Finally, clean up some extra files left over from running tests:
+rm -rf /tmp/{*,.*}
+There are also several files in the /usr/lib and /usr/libexec directories with a file name extension of .la. These are "libtool archive" files. On a modern Linux system the libtool .la files are only useful for libltdl. No libraries in LFS are expected to be loaded by libltdl, and it's known that some .la files can break BLFS package builds. Remove those files now:
+find /usr/lib /usr/libexec -name \*.la -delete
+For more information about libtool archive files, see the BLFS section "About Libtool Archive (.la) files".
+The compiler built in Chapter 6 and Chapter 7 is still partially installed and not needed anymore. Remove it with:
+find /usr -depth -name $(uname -m)-lfs-linux-gnu\* | xargs rm -rf
+Finally, remove the temporary 'tester' user account created at the beginning of the previous chapter.
+userdel -r tester
