@@ -1,7 +1,10 @@
 
 #!/bin/bash
 set -e
-cd /sources/procps-ng-4.0.7
+
+cd /sources
+tar -xf procps-ng-4.0.7.tar.xz
+cd procps-ng-4.0.7
 
 ./configure --prefix=/usr \
     --docdir=/usr/share/doc/procps-ng-4.0.7 \
@@ -11,7 +14,10 @@ cd /sources/procps-ng-4.0.7
     --with-systemd
 
 make
-make check
 make install
+
+cd /sources
+rm -rf procps-ng-4.0.7
+
 
 echo "Procps-ng selesai."

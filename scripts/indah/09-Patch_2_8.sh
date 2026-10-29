@@ -1,11 +1,15 @@
 
 #!/bin/bash
 set -e
-cd /sources/patch-2.8
+cd /sources
+tar -xf patch-2.8.tar.xz
+cd patch-2.8
 
 ./configure --prefix=/usr
 make
-make check
 make install
+
+cd /sources
+rm -rf patch-2.8
 
 echo "Patch selesai."
