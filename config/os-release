@@ -1,7 +1,7 @@
-NAME="SiliOS"
-VERSION="13.1-systemd (Kujang)"
+NAME="WebForge OS"
+VERSION="13.1-systemd (wefor)"
 ID=silios
-PRETTY_NAME="SiliOS 13.1-systemd (Kujang Edition)"
-VERSION_CODENAME="kujang"
+PRETTY_NAME="SiliOS 13.1-systemd (wefor Edition)"
+VERSION_CODENAME="wefor"
 HOME_URL="https://fuzi.web.id/"
 RELEASE_TYPE="stable"

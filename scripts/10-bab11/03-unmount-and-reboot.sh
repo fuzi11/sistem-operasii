@@ -59,6 +59,6 @@ fi
 
 echo "========================================================="
 echo " PROSES UNMOUNT SELESAI DENGAN AMAN."
-echo " Sistem LFS/SiliOS Anda siap dinyalakan!"
+echo " Sistem LFS Anda siap dinyalakan!"
 echo " Silakan eksekusi 'reboot' untuk booting pertama kali."
 echo "========================================================="
