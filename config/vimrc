@@ -1,0 +1,14 @@
+" Begin /etc/vimrc
+
+set nocompatible
+set backspace=2
+set syntax=on
+set number
+set hlsearch
+set incsearch
+set tabstop=4
+set shiftwidth=4
+set expandtab
+set encoding=utf-8
+
+" End /etc/vimrc

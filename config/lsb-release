@@ -1,0 +1,4 @@
+DISTRIB_ID="SiliOS"
+DISTRIB_RELEASE="13.1-systemd"
+DISTRIB_CODENAME="kujang"
+DISTRIB_DESCRIPTION="SiliOS 13.1 (Linux From Scratch Custom Build)"

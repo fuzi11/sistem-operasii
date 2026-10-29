@@ -1,0 +1,7 @@
+NAME="SiliOS"
+VERSION="13.1-systemd (Kujang)"
+ID=silios
+PRETTY_NAME="SiliOS 13.1-systemd (Kujang Edition)"
+VERSION_CODENAME="kujang"
+HOME_URL="https://fuzi.web.id/"
+RELEASE_TYPE="stable"
