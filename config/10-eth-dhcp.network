@@ -1,5 +1,5 @@
 [Match]
-Name=e*
+Name=e* en* eth*
 
 [Network]
 DHCP=ipv4

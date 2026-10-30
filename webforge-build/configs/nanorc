@@ -1,0 +1,10 @@
+# WebForge OS - Minimalist Production Nano Configuration
+set autoindent
+set linenumbers
+set mouse
+set tabsize 4
+set tabstospaces
+set constantshow
+
+# Include all default syntax highlighting rules
+include "/usr/share/nano/*.nanorc"
