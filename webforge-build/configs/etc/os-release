@@ -1,0 +1,5 @@
+NAME="WebForge OS"
+VERSION="1.0 LTS"
+ID=webforge
+PRETTY_NAME="WebForge OS 1.0 (LFS 13.1-systemd Web Server)"
+HOME_URL="https://github.com/fuzi11/sistem-operasii"

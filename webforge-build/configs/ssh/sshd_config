@@ -1,9 +1,5 @@
-Port 22
-Protocol 2
-PermitRootLogin yes
+PermitRootLogin no
 MaxAuthTries 3
-PubkeyAuthentication yes
-PasswordAuthentication yes
 PermitEmptyPasswords no
 X11Forwarding no
-Subsystem sftp /usr/libexec/sftp-server
+AllowGroups wheel

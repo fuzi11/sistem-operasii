@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# WebForge OS CLI Manager
+
+LOG_FILE="/var/log/webforge.log"
+LIB_DIR="/usr/lib/webforge/modules"
+
+# Pastikan dijalankan sebagai root
+if [ "$EUID" -ne 0 ]; then
+  echo "[-] Error: Perintah ini harus dijalankan sebagai user root!" >&2
+  exit 1
+fi
+
+# Catat log aktivitas
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ROOT] CMD: webforge $*" >> "$LOG_FILE"
+
+COMMAND="$1"
+
+case "$COMMAND" in
+  site)
+    source "$LIB_DIR/site.sh"
+    handle_site "$@"
+    ;;
+  ssl)
+    source "$LIB_DIR/ssl.sh"
+    handle_ssl "$@"
+    ;;
+  start|stop|restart|reload|test|status|enable|disable|version|modules)
+    source "$LIB_DIR/nginx.sh"
+    handle_nginx "$COMMAND" "$@"
+    ;;
+  fw)
+    source "$LIB_DIR/fw.sh"
+    handle_fw "$@"
+    ;;
+  log|stats|conn|monitor|disk|health)
+    source "$LIB_DIR/monitoring.sh"
+    handle_monitoring "$@"
+    ;;
+  audit|harden|perms|ssh|user|logins|headers)
+    source "$LIB_DIR/security.sh"
+    handle_security "$@"
+    ;;
+  backup|restore)
+    source "$LIB_DIR/backup.sh"
+    if [ "$COMMAND" == "restore" ]; then
+      handle_backup "restore" "$2"
+    else
+      handle_backup "$2" "$3" "$4"
+    fi
+    ;;
+  net|hostname|time|timezone|sysinfo|services|reboot|shutdown|cleanup)
+    source "$LIB_DIR/system.sh"
+    handle_system "$COMMAND" "$2" "$3"
+    ;;
+  timers|timer|firstboot|setup|update-check|export|import)
+    source "$LIB_DIR/automation.sh"
+    handle_automation "$COMMAND" "$2" "$3"
+    ;;
+  help|--help|-h|doctor)
+    source "$LIB_DIR/help.sh"
+    if [ "$COMMAND" == "doctor" ]; then
+      show_help "doctor"
+    else
+      show_help "$2"
+    fi
+    ;;
+  *)
+    echo "[!] Perintah tidak dikenal. Ketik 'webforge help' untuk daftar perintah."
+    exit 1
+    ;;
+esac
