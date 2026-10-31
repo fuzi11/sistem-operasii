@@ -32,7 +32,7 @@ case "$COMMAND" in
     source "$LIB_DIR/fw.sh"
     handle_fw "$@"
     ;;
-  log|stats|conn|monitor|disk|health)
+  log|stats|conn|monitor|monitor-live|disk|health)
     source "$LIB_DIR/monitoring.sh"
     handle_monitoring "$@"
     ;;

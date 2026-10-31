@@ -64,11 +64,11 @@ handle_monitoring() {
       *)
         echo "Sub-perintah log tidak dikenal. Gunakan: access, error, top-ip, top-url, status-codes, errors-today, search, rotate."
         ;;
-    es:
+    esac
     return
   fi
 
-  # Perintah monitoring mandiri lainnya (stats, conn, monitor, disk, health)
+  # Perintah monitoring mandiri lainnya (stats, conn, monitor, monitor-live, disk, health)
   case "$action" in
     stats)
       echo "=== NGINX STUB STATUS ==="
@@ -92,6 +92,30 @@ handle_monitoring() {
       echo "4. Status Layanan Inti:"
       systemctl is-active --quiet nginx && echo " - Nginx: Aktif" || echo " - Nginx: Mati"
       systemctl is-active --quiet ssh && echo " - SSH: Aktif" || echo " - SSH: Mati"
+      ;;
+    monitor-live)
+      local interval="${sub:-2}"
+      echo "[i] Memulai Live Monitor (Penyegaran setiap ${interval} detik). Tekan Ctrl+C untuk keluar."
+      sleep 1
+      while true; do
+        clear
+        echo "=== WEBFORGE LIVE SYSTEM MONITOR ($(date '+%H:%M:%S')) ==="
+        echo "1. Uptime & Load Average:"
+        uptime
+        echo ""
+        echo "2. Penggunaan Memori (RAM & Swap):"
+        free -h
+        echo ""
+        echo "3. Penggunaan Disk Root (/):"
+        df -h / | awk 'NR==1 || NR==2'
+        echo ""
+        echo "4. 5 Proses Pengguna CPU/RAM Teratas:"
+        ps -eo pid,%cpu,%mem,comm --sort=-%cpu | head -n 6
+        echo ""
+        echo "--------------------------------------------------"
+        echo "Tekan [Ctrl+C] untuk berhenti."
+        sleep "$interval"
+      done
       ;;
     disk)
       echo "=== Penggunaan Disk per Situs (/var/www) ==="
