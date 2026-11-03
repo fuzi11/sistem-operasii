@@ -28,6 +28,7 @@ WebForge OS dikembangkan dengan tujuan:
 ## Fitur Utama
 
 ### 1. Web Server Management
+
 Pengelolaan layanan Nginx, meliputi:
 - Menjalankan dan menghentikan layanan.
 - Memulai ulang dan memuat ulang konfigurasi.
@@ -35,6 +36,7 @@ Pengelolaan layanan Nginx, meliputi:
 - Mengelola konfigurasi website.
 
 ### 2. Site Management
+
 Mengelola website melalui command:
 - Menambahkan dan menghapus website.
 - Mengaktifkan dan menonaktifkan website.
@@ -43,6 +45,7 @@ Mengelola website melalui command:
 - Mengaktifkan mode maintenance.
 
 ### 3. SSL/TLS Management
+
 Menyediakan perintah untuk:
 - Membuat sertifikat SSL.
 - Memperbarui sertifikat.
@@ -50,6 +53,7 @@ Menyediakan perintah untuk:
 - Mengelola sertifikat SSL/TLS.
 
 ### 4. Firewall Management
+
 Menyediakan pengelolaan firewall menggunakan nftables, seperti:
 - Memeriksa status firewall.
 - Mengizinkan atau menolak koneksi.
@@ -57,6 +61,7 @@ Menyediakan pengelolaan firewall menggunakan nftables, seperti:
 - Mengatur port jaringan.
 
 ### 5. Monitoring dan Logging
+
 Menyediakan fitur pemantauan sistem, seperti:
 - Memeriksa penggunaan sumber daya.
 - Melihat koneksi aktif.
@@ -65,6 +70,7 @@ Menyediakan fitur pemantauan sistem, seperti:
 - Memeriksa kondisi kesehatan sistem.
 
 ### 6. Security Management
+
 Mendukung pengelolaan keamanan dasar melalui:
 - Audit konfigurasi sistem.
 - Pengaturan hak akses berkas.
@@ -73,9 +79,10 @@ Mendukung pengelolaan keamanan dasar melalui:
 - Pemeriksaan keamanan header HTTP.
 
 ### 7. Backup dan Restore
+
 Menyediakan pengelolaan pencadangan dan pemulihan konfigurasi serta data website.
 
-**Catatan:** Fitur-fitur di atas merupakan fitur yang direncanakan atau disediakan melalui command WebForge. Ketersediaan akhirnya perlu disesuaikan dengan hasil implementasi dan pengujian.
+**Catatan:** Ketersediaan setiap fitur disesuaikan dengan hasil implementasi dan pengujian pada WebForge OS.
 
 ## Teknologi yang Digunakan
 
@@ -87,7 +94,7 @@ Menyediakan pengelolaan pencadangan dan pemulihan konfigurasi serta data website
 | systemd | Pengelolaan proses dan layanan sistem |
 | Bash Shell | Menjalankan script dan command |
 | nftables | Pengelolaan firewall |
-| VirtualBox | Lingkungan virtual untuk pengujian |
+| VMware Workstation | Lingkungan virtual untuk pengujian |
 
 ## Persyaratan Sistem
 
@@ -100,7 +107,7 @@ Spesifikasi minimum dan rekomendasi akan dicantumkan berdasarkan hasil pengujian
 | Prosesor | Menunggu hasil pengujian |
 | RAM | Menunggu hasil pengujian |
 | Penyimpanan | Menunggu hasil pengujian |
-| Virtualisasi | VirtualBox atau perangkat yang mendukung booting ISO |
+| Virtualisasi | VMware Workstation atau perangkat yang mendukung booting ISO |
 
 ## Instalasi
 
@@ -109,19 +116,22 @@ Spesifikasi minimum dan rekomendasi akan dicantumkan berdasarkan hasil pengujian
 Sebelum menjalankan WebForge OS, siapkan:
 
 1. File ISO WebForge OS.
-2. Oracle VM VirtualBox atau komputer yang mendukung booting ISO.
+2. VMware Workstation.
+3. Komputer yang mendukung fitur virtualisasi.
 
-### Menjalankan melalui VirtualBox
+### Menjalankan melalui VMware Workstation
 
-1. Buka Oracle VM VirtualBox.
-2. Buat virtual machine baru.
-3. Pilih tipe sistem operasi Linux yang sesuai.
-4. Atur kapasitas RAM dan penyimpanan.
-5. Masukkan file ISO WebForge OS ke virtual optical drive.
-6. Jalankan virtual machine.
-7. Ikuti proses booting dan instruksi yang ditampilkan.
+1. Buka VMware Workstation.
+2. Pilih menu **Create a New Virtual Machine**.
+3. Pilih tipe konfigurasi virtual machine yang akan digunakan.
+4. Pilih opsi untuk menggunakan file ISO sebagai media instalasi.
+5. Masukkan file ISO WebForge OS.
+6. Tentukan nama virtual machine dan lokasi penyimpanannya.
+7. Atur kapasitas RAM, jumlah prosesor, dan penyimpanan virtual sesuai kebutuhan pengujian.
+8. Selesaikan konfigurasi virtual machine.
+9. Jalankan virtual machine dan tunggu proses booting WebForge OS.
 
-**Catatan:** Mekanisme instalasi permanen, apabila tersedia, akan dijelaskan setelah proses build ISO dan pengujian selesai.
+**Catatan:** Langkah tersebut merupakan panduan menjalankan ISO melalui VMware Workstation. Mekanisme instalasi permanen, apabila tersedia, akan dijelaskan setelah proses build ISO dan pengujian selesai.
 
 ## Cara Penggunaan
 
@@ -137,7 +147,6 @@ WebForge OS menyediakan command `webforge` sebagai antarmuka pengelolaan layanan
 | `webforge health` | Memeriksa kondisi sistem |
 | `webforge monitor` | Memantau penggunaan sumber daya |
 | `webforge site list` | Menampilkan daftar website |
-| `webforge version` | Memeriksa versi Nginx melalui kelompok command Nginx |
 
 ### Pengelolaan Nginx
 
@@ -148,6 +157,7 @@ WebForge OS menyediakan command `webforge` sebagai antarmuka pengelolaan layanan
 | `webforge restart` | Memulai ulang Nginx |
 | `webforge reload` | Memuat ulang konfigurasi Nginx |
 | `webforge test` | Memeriksa konfigurasi Nginx |
+| `webforge version` | Memeriksa versi Nginx |
 
 ### Monitoring Sistem
 
