@@ -191,14 +191,14 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
     <p class="sub">WebForge OS memakai <code>apk</code> sebagai manajer paket. Berikut contoh pemakaian yang paling sering dipakai. Jalankan sebagai root atau lewat sudo.</p>
     <div class="apk">
       <div class="pk"><h3>Perbarui sistem</h3>
-        <div class="ex"><div class="cmd"><code>apk update --allow-untrusted</code><button class="cp" type="button">Salin</button></div><p>Segarkan indeks paket dari repositori. Jalankan ini dulu sebelum memasang atau upgrade.</p></div>
-        <div class="ex"><div class="cmd"><code>apk upgrade --allow-untrusted</code><button class="cp" type="button">Salin</button></div><p>Naikkan semua paket terpasang ke versi terbaru.</p></div>
+        <div class="ex"><div class="cmd"><code>apk update </code><button class="cp" type="button">Salin</button></div><p>Segarkan indeks paket dari repositori. Jalankan ini dulu sebelum memasang atau upgrade.</p></div>
+        <div class="ex"><div class="cmd"><code>apk upgrade </code><button class="cp" type="button">Salin</button></div><p>Naikkan semua paket terpasang ke versi terbaru.</p></div>
         <div class="ex"><div class="cmd"><code>apk list -u</code><button class="cp" type="button">Salin</button></div><p>Lihat paket yang punya versi lebih baru.</p></div>
       </div>
       <div class="pk"><h3>Pasang dan hapus</h3>
-        <div class="ex"><div class="cmd"><code>apk add --allow-untrusted nginx</code><button class="cp" type="button">Salin</button></div><p>Pasang satu paket. Beberapa paket sekaligus: apk add --allow-untrusted curl nano.</p></div>
-        <div class="ex"><div class="cmd"><code>apk add --allow-untrusted nginx=&lt;versi&gt;</code><button class="cp" type="button">Salin</button></div><p>Pasang versi tertentu. Isi &lt;versi&gt; sesuai hasil apk policy.</p></div>
-        <div class="ex"><div class="cmd"><code>apk add --allow-untrusted ./paket.apk</code><button class="cp" type="button">Salin</button></div><p>Pasang berkas .apk lokal, misalnya paket buatan sendiri.</p></div>
+        <div class="ex"><div class="cmd"><code>apk add  nginx</code><button class="cp" type="button">Salin</button></div><p>Pasang satu paket. Beberapa paket sekaligus: apk add  curl nano.</p></div>
+        <div class="ex"><div class="cmd"><code>apk add  nginx=&lt;versi&gt;</code><button class="cp" type="button">Salin</button></div><p>Pasang versi tertentu. Isi &lt;versi&gt; sesuai hasil apk policy.</p></div>
+        <div class="ex"><div class="cmd"><code>apk add  ./paket.apk</code><button class="cp" type="button">Salin</button></div><p>Pasang berkas .apk lokal, misalnya paket buatan sendiri.</p></div>
         <div class="ex"><div class="cmd"><code>apk del nginx</code><button class="cp" type="button">Salin</button></div><p>Hapus paket. Konfigurasi di /etc bisa tetap ada.</p></div>
       </div>
       <div class="pk"><h3>Cari dan lihat paket</h3>
@@ -212,16 +212,16 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
         <div class="ex"><div class="cmd"><code>apk info -W /usr/sbin/nginx</code><button class="cp" type="button">Salin</button></div><p>Cari tahu paket mana yang memiliki berkas ini.</p></div>
       </div>
       <div class="pk"><h3>Perawatan</h3>
-        <div class="ex"><div class="cmd"><code>apk fix --allow-untrusted</code><button class="cp" type="button">Salin</button></div><p>Perbaiki paket yang rusak atau pemasangan yang terputus.</p></div>
+        <div class="ex"><div class="cmd"><code>apk fix </code><button class="cp" type="button">Salin</button></div><p>Perbaiki paket yang rusak atau pemasangan yang terputus.</p></div>
         <div class="ex"><div class="cmd"><code>apk verify nginx</code><button class="cp" type="button">Salin</button></div><p>Cek keutuhan berkas paket.</p></div>
         <div class="ex"><div class="cmd"><code>apk cache clean</code><button class="cp" type="button">Salin</button></div><p>Bersihkan cache paket untuk menghemat disk.</p></div>
       </div>
       <div class="pk"><h3>Pemasangan sementara</h3>
-        <div class="ex"><div class="cmd"><code>apk add --allow-untrusted --virtual .build-deps gcc make</code><button class="cp" type="button">Salin</button></div><p>Pasang alat build sebagai satu grup bernama .build-deps.</p></div>
+        <div class="ex"><div class="cmd"><code>apk add  --virtual .build-deps gcc make</code><button class="cp" type="button">Salin</button></div><p>Pasang alat build sebagai satu grup bernama .build-deps.</p></div>
         <div class="ex"><div class="cmd"><code>apk del .build-deps</code><button class="cp" type="button">Salin</button></div><p>Hapus seluruh grup itu sekaligus setelah selesai build.</p></div>
       </div>
     </div>
-    <p class="note">Opsi <code>--allow-untrusted</code> melewati pengecekan tanda tangan paket, jadi apk menerima paket yang tidak ditandatangani. Pakai hanya untuk repositori atau paket buatan sendiri yang Anda percaya.</p>
+    <p class="note">Opsi <code></code> melewati pengecekan tanda tangan paket, jadi apk menerima paket yang tidak ditandatangani. Pakai hanya untuk repositori atau paket buatan sendiri yang Anda percaya.</p>
     <p class="note">Daftar repositori ada di <code>/etc/apk/repositories</code>. Untuk cek versi paket baru dari perintah WebForge, pakai <code>webforge update-check</code>.</p>
   </div>
 </section>
