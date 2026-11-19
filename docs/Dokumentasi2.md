@@ -14,7 +14,7 @@
 | **Network Manager** | `systemd-networkd` + `systemd-resolved` |
 | **Time Sync** | `systemd-timesyncd` |
 | **Remote Access** | OpenSSH 9.8p1 |
-| **Web Stack Target** | Nginx 1.26.2 + PHP 8.3 + SQLite / MariaDB |
+| **Web Stack Target** | Nginx 1.26.2 |
 | **System Info Fetch**| Fastfetch + Chafa (Custom ASCII/Image Renderer) |
 | **Target Media** | Virtual Machine (VMware Workstation Pro / ESXi) |
 
