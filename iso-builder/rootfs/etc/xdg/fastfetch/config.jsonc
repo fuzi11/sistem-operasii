@@ -1,0 +1,40 @@
+{
+  "$schema": "https://github.com",
+  "logo": {
+    "type": "file",
+    "source": "/usr/share/webforge/logo.txt",
+    "color": {
+      "1": "cyan"
+    },
+    "padding": {
+      "top": 1,
+      "left": 2,
+      "right": 4
+    }
+  },
+  "display": {
+    "separator": " ➜  ",
+    "color": {
+      "keys": "cyan",
+      "title": "magenta"
+    }
+  },
+  "modules": [
+    "title",
+    "separator",
+    "os",
+    "host",
+    "kernel",
+    "uptime",
+    "shell",
+    "display",
+    "terminal",
+    "cpu",
+    "gpu",
+    "memory",
+    "swap",
+    "disk",
+    "break",
+    "colors"
+  ]
+}

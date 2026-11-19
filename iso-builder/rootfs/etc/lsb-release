@@ -1,0 +1,4 @@
+DISTRIB_ID="WebForge Os"
+DISTRIB_RELEASE="13.1-systemd"
+DISTRIB_CODENAME="wefor"
+DISTRIB_DESCRIPTION="WebForge Os 13.1-systemd (wefor)"

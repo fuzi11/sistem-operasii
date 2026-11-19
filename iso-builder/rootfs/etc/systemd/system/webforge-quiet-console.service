@@ -1,0 +1,10 @@
+[Unit]
+Description=Sembunyikan log kernel di konsol setelah boot selesai
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/dmesg -n 3
+
+[Install]
+WantedBy=multi-user.target

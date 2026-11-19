@@ -1,0 +1,12 @@
+#!/bin/bash
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export TERM=${TERM:-linux}
+tty="${1:-tty1}"
+mode=$(sed -n 's/.*webforge\.mode=\([a-z-]*\).*/\1/p' /proc/cmdline)
+if [ "$tty" = tty1 ]; then
+  case "$mode" in
+    install-tui) /usr/sbin/webforge-install --tui ;;
+    install-cli) /usr/sbin/webforge-install --cli ;;
+  esac
+fi
+exec agetty -o '-p -- \u' --noclear "$tty" "$TERM"

@@ -1,0 +1,12 @@
+# Hasil build, terlalu besar untuk repositori (unggah ISO lewat GitHub Releases)
+*.iso
+*.squashfs
+isodir/boot/vmlinuz
+isodir/boot/initrd.img
+isodir/live/
+# Cadangan dan sisa kerja
+*.bak
+*.tmp
+*.baru
+*.sebelum-*
+sources/

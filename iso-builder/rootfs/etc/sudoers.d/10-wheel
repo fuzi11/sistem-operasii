@@ -1,0 +1,3 @@
+%wheel ALL=(ALL:ALL) ALL
+Defaults secure_path="/usr/sbin:/usr/bin"
+Defaults rootpw

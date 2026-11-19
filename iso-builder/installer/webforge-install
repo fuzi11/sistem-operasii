@@ -1,0 +1,355 @@
+#!/bin/bash
+# WebForge OS installer. Pakai: webforge-install --tui | --cli
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export TERM=${TERM:-linux}
+MODE=tui
+[ "$1" = "--cli" ] && MODE=cli
+command -v dialog >/dev/null 2>&1 || MODE=cli
+[ "$(id -u)" -eq 0 ] || { echo "Jalankan sebagai root."; exit 1; }
+trap '' INT TSTP QUIT
+BT="WebForge OS Installer"
+LOG=/tmp/webforge-install.log; : > "$LOG"
+exec 3>&1
+[ -d /sys/firmware/efi ] && UEFI=1 || UEFI=0
+KEYMAP=us; TZ_=Asia/Jakarta; HN=webforge; USERN=""; USERPW=""; ROOTPW=""
+DISK=""; PMODE=auto; ESP=""; FMT_ESP=0; ROOTP=""; SWAPP=""; SWAPMB=0
+
+# ---------- UI (tui = dialog, cli = teks). Return 1 = kembali ----------
+msg() {
+  if [ $MODE = tui ]; then dialog --backtitle "$BT" --title "${2:-Info}" --msgbox "$1" 15 68 >&3
+  else printf '\n== %s ==\n%b\n' "${2:-Info}" "$1" >&2; read -rp "[Enter untuk lanjut] " _; fi
+}
+yesno() {
+  if [ $MODE = tui ]; then dialog --backtitle "$BT" --yes-label Ya --no-label Tidak --yesno "$1" 16 68 >&3
+  else local a; read -rp "$(printf '%b' "$1") [y/N] " a; case $a in y*|Y*) return 0;; *) return 1;; esac; fi
+}
+input() {
+  local v
+  if [ $MODE = tui ]; then
+    v=$(dialog --backtitle "$BT" --cancel-label Kembali --inputbox "$1" 10 66 "$2" 2>&1 1>&3) || return 1
+  else
+    read -rp "$1 [$2] (< = kembali): " v; [ "$v" = "<" ] && return 1
+  fi
+  echo "${v:-$2}"
+}
+secret() {
+  local v
+  if [ $MODE = tui ]; then
+    v=$(dialog --backtitle "$BT" --cancel-label Kembali --insecure --passwordbox "$1" 10 66 2>&1 1>&3) || return 1
+  else
+    read -rsp "$1 (< = kembali): " v; echo >&2; [ "$v" = "<" ] && return 1
+  fi
+  echo "$v"
+}
+menu() {
+  local title=$1; shift
+  if [ $MODE = tui ]; then
+    dialog --backtitle "$BT" --cancel-label Kembali --menu "$title" 20 72 12 "$@" 2>&1 1>&3 || return 1
+  else
+    local -a tags=(); local i=1 n
+    printf '\n%s\n' "$title" >&2
+    while [ $# -gt 1 ]; do printf '  %d) %s\n' $i "$2" >&2; tags+=("$1"); shift 2; i=$((i+1)); done
+    while :; do
+      read -rp "Pilih nomor (< = kembali): " n
+      [ "$n" = "<" ] && return 1
+      if [[ $n =~ ^[0-9]+$ ]] && [ "$n" -ge 1 ] && [ "$n" -le ${#tags[@]} ]; then echo "${tags[$((n-1))]}"; return 0; fi
+    done
+  fi
+}
+step() { if [ $MODE = tui ]; then dialog --backtitle "$BT" --infobox "$1" 5 64 >&3; else echo ">> $1"; fi; }
+
+cleanup() { sync; umount -R /target >/dev/null 2>&1; }
+# die/run hanya dipakai di dalam subshell do_install: exit = keluar dari instalasi, bukan dari installer
+die() { cleanup; msg "GAGAL: $1\n\nLog lengkap: $LOG\n\nAnda akan kembali ke menu pemilihan disk." "Error"; exit 1; }
+run() { "$@" >>"$LOG" 2>&1 || die "perintah gagal: $*"; }
+chr() { chroot /target /usr/bin/env -i HOME=/root TERM=linux PATH=/usr/sbin:/usr/bin:/sbin:/bin "$@"; }
+pname() { case "$1" in *[0-9]) echo "${1}p$2";; *) echo "${1}$2";; esac; }
+askpw() {
+  local a b
+  while :; do
+    a=$(secret "Password untuk $1") || return 1
+    b=$(secret "Ulangi password untuk $1") || return 1
+    if [ -n "$a" ] && [ "$a" = "$b" ]; then echo "$a"; return 0; fi
+    msg "Password kosong atau tidak sama. Coba lagi." Peringatan
+  done
+}
+
+# ---------- partisi ----------
+auto_partition() {
+  local s e n
+  step "Membuat partisi otomatis di $DISK ..."
+  umount "${DISK}"* >/dev/null 2>&1
+  run wipefs -a "$DISK"
+  if [ $UEFI = 1 ]; then
+    run parted -s "$DISK" mklabel gpt mkpart ESP fat32 1MiB 513MiB set 1 esp on
+    ESP=$(pname "$DISK" 1); FMT_ESP=1; s=513; n=2
+  else
+    run parted -s "$DISK" mklabel gpt mkpart biosboot 1MiB 3MiB set 1 bios_grub on
+    s=3; n=2
+  fi
+  if [ "$SWAPMB" -gt 0 ]; then
+    e=$((s + SWAPMB))
+    run parted -s "$DISK" mkpart swap linux-swap ${s}MiB ${e}MiB
+    SWAPP=$(pname "$DISK" $n); s=$e; n=$((n + 1))
+  fi
+  run parted -s "$DISK" mkpart root ext4 ${s}MiB 100%
+  ROOTP=$(pname "$DISK" $n)
+  partprobe "$DISK" >>"$LOG" 2>&1; udevadm settle; sleep 1
+}
+manual_partition() {
+  local cur want items=() n sz t ft lbl
+  cur=$(parted -s "$DISK" print 2>/dev/null | sed -n 's/^Partition Table: //p')
+  if [ $UEFI = 1 ]; then want=gpt
+  else
+    want=$(menu "Tabel partisi $DISK (sekarang: ${cur:-kosong})" msdos "MBR/msdos (disarankan untuk BIOS)" gpt "GPT (wajib partisi BIOS boot 1-2 MB)" keep "Biarkan tabel yang ada") || return 1
+    [ "$want" = keep ] && want=$cur
+  fi
+  if [ -n "$want" ] && [ "$want" != "$cur" ]; then
+    yesno "Tabel partisi $DISK akan dibuat ulang sebagai $want.\n\nSEMUA partisi yang ada di disk ini HILANG. Lanjutkan?" || return 1
+    umount "${DISK}"* >/dev/null 2>&1
+    parted -s "$DISK" mklabel "$want" >>"$LOG" 2>&1 || { msg "Gagal membuat tabel partisi." Error; return 1; }
+  fi
+  msg "cfdisk akan dibuka untuk $DISK.\n\nBuat: partisi ROOT (Linux filesystem, min 4 GB) dan, bila mau, partisi SWAP (tipe Linux swap).\nUEFI: tambah partisi EFI System (min 300 MB).\nGPT + BIOS: tambah partisi 'BIOS boot' 1-2 MB.\n\nPilih Write, ketik yes, lalu Quit." "Partisi manual"
+  cfdisk "$DISK"; partprobe "$DISK" >>"$LOG" 2>&1; udevadm settle
+  if [ $UEFI = 0 ]; then
+    lbl=$(parted -s "$DISK" print 2>/dev/null | sed -n 's/^Partition Table: //p')
+    if [ "$lbl" = gpt ] && ! parted -s "$DISK" print 2>/dev/null | grep -q bios_grub; then
+      msg "Tabel GPT di mode BIOS butuh partisi 'BIOS boot' (1-2 MB).\nBuat partisinya, atau pilih tabel msdos." Peringatan; return 1
+    fi
+  fi
+  while read -r n sz t ft; do [ "$t" = part ] && items+=("$n" "$sz ${ft:-kosong}"); done < <(lsblk -lpno NAME,SIZE,TYPE,FSTYPE "$DISK")
+  if [ ${#items[@]} -eq 0 ]; then msg "Tidak ada partisi di $DISK." Error; return 1; fi
+  ROOTP=$(menu "Pilih partisi ROOT (akan DIFORMAT ext4)" "${items[@]}") || return 1
+  if [ $UEFI = 1 ]; then
+    ESP=$(menu "Pilih partisi EFI System" "${items[@]}") || return 1
+    yesno "Format partisi EFI $ESP (FAT32)?\n\nPilih Tidak jika berisi bootloader OS lain." && FMT_ESP=1
+  fi
+  SWAPP=$(menu "Pilih partisi SWAP (opsional)" none "Tanpa swap" "${items[@]}") || return 1
+  [ "$SWAPP" = none ] && SWAPP=""
+  if [ -n "$SWAPP" ] && { [ "$SWAPP" = "$ROOTP" ] || [ "$SWAPP" = "$ESP" ]; }; then msg "Partisi swap tidak boleh sama dengan root/EFI." Error; return 1; fi
+  if [ -n "$ESP" ] && [ "$ESP" = "$ROOTP" ]; then msg "Partisi EFI tidak boleh sama dengan root." Error; return 1; fi
+  return 0
+}
+
+# ---------- salin & konfigurasi (dijalankan di subshell) ----------
+copy_system() {
+  local rc
+  if [ $MODE = tui ]; then
+    rsync -aHAXx --info=progress2 --no-inc-recursive /mnt/live/rootfs/ /target/ 2>>"$LOG" \
+      | tr '\r' '\n' | awk '/%/ { p=$2; gsub("%","",p); print p+0; fflush() }' \
+      | dialog --backtitle "$BT" --title "Menyalin sistem" --gauge "Menyalin file ke $ROOTP ..." 8 64 0 >&3
+    rc=${PIPESTATUS[0]}
+  else
+    echo ">> Menyalin sistem (beberapa menit)..."
+    rsync -aHAXx --info=progress2 --no-inc-recursive /mnt/live/rootfs/ /target/; rc=$?
+  fi
+  { [ $rc -eq 0 ] || [ $rc -eq 24 ]; } || die "rsync gagal (kode $rc)"
+}
+configure_system() {
+  local R=/target RU grp g
+  step "Mengatur sistem (hostname, akun, fstab)..."
+  mkdir -p $R/{proc,sys,dev,run,tmp,mnt,media}; chmod 1777 $R/tmp
+  : > $R/etc/machine-id
+  echo "$HN" > $R/etc/hostname
+  sed -i '/127\.0\.1\.1/d' $R/etc/hosts 2>/dev/null; echo "127.0.1.1 $HN" >> $R/etc/hosts
+  echo "KEYMAP=$KEYMAP" > $R/etc/vconsole.conf
+  ln -sf "/usr/share/zoneinfo/$TZ_" $R/etc/localtime
+  RU=$(blkid -s UUID -o value "$ROOTP")
+  {
+    echo "# /etc/fstab - dibuat oleh installer WebForge OS"
+    echo "UUID=$RU  /  ext4  defaults  1  1"
+    [ $UEFI = 1 ] && echo "UUID=$(blkid -s UUID -o value "$ESP")  /boot/efi  vfat  umask=0077  0  2"
+    [ -n "$SWAPP" ] && echo "UUID=$(blkid -s UUID -o value "$SWAPP")  none  swap  sw  0  0"
+  } > $R/etc/fstab
+
+  # akun: grup wheel (sudo) + grup umum yang ada
+  grep -q '^wheel:' $R/etc/group || chr groupadd wheel >>"$LOG" 2>&1
+  grp=wheel
+  for g in users audio video input cdrom netdev; do grep -q "^$g:" $R/etc/group && grp="$grp,$g"; done
+  chr useradd -m -s /bin/bash -G "$grp" "$USERN" >>"$LOG" 2>&1 || die "useradd gagal"
+  printf '%s:%s\n' "$USERN" "$USERPW" | chr chpasswd >>"$LOG" 2>&1 || die "set password user gagal"
+  printf 'root:%s\n' "$ROOTPW" | chr chpasswd >>"$LOG" 2>&1 || die "set password root gagal"
+
+  # sudo untuk grup wheel
+  mkdir -p $R/etc/sudoers.d
+  cat > $R/etc/sudoers.d/10-wheel <<'SUDOEOF'
+%wheel ALL=(ALL:ALL) ALL
+Defaults secure_path="/usr/sbin:/usr/bin"
+Defaults rootpw
+SUDOEOF
+  chmod 0440 $R/etc/sudoers.d/10-wheel
+  [ -f $R/usr/bin/sudo ] && chmod 4755 $R/usr/bin/sudo
+  chr visudo -c >>"$LOG" 2>&1 || { rm -f $R/etc/sudoers.d/10-wheel; die "konfigurasi sudoers tidak valid"; }
+
+  # sterilkan: buang semua jejak installer/live, kunci SSH dibuat baru
+  rm -f $R/usr/sbin/webforge-install $R/usr/sbin/webforge-tty1
+  rm -rf $R/etc/systemd/system/getty@tty1.service.d $R/mnt/live
+  rm -f $R/root/.bash_history $R/etc/ssh/ssh_host_*
+  chr ssh-keygen -A >>"$LOG" 2>&1
+}
+install_bootloader() {
+  local R=/target RU RPU ROOTARG
+  step "Memasang GRUB..."
+  mount --bind /dev $R/dev; mount -t proc proc $R/proc; mount -t sysfs sysfs $R/sys; mount --bind /run $R/run
+  [ $UEFI = 1 ] && mount -t efivarfs efivarfs $R/sys/firmware/efi/efivars >/dev/null 2>&1
+  RU=$(blkid -s UUID -o value "$ROOTP"); RPU=$(blkid -s PARTUUID -o value "$ROOTP")
+  ROOTARG="PARTUUID=$RPU"; [ -z "$RPU" ] && ROOTARG="$ROOTP"
+  mkdir -p $R/boot/grub
+  cat > $R/boot/grub/grub.cfg <<GRUBCFG
+set default=0
+set timeout=5
+insmod part_gpt
+insmod part_msdos
+insmod ext2
+search --no-floppy --fs-uuid --set=root $RU
+menuentry "WebForge OS" {
+    linux /boot/vmlinuz-webforge-live root=$ROOTARG rootwait ro console=tty0 loglevel=7
+}
+menuentry "WebForge OS (recovery)" {
+    linux /boot/vmlinuz-webforge-live root=$ROOTARG rootwait ro console=tty0 nomodeset systemd.unit=rescue.target
+}
+GRUBCFG
+  if [ $UEFI = 1 ]; then
+    chr grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=WebForgeOS --recheck >>"$LOG" 2>&1
+    chr grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable --recheck >>"$LOG" 2>&1 || die "grub-install (UEFI) gagal"
+  else
+    chr grub-install --target=i386-pc --recheck "$DISK" >>"$LOG" 2>&1 || die "grub-install (BIOS) gagal"
+  fi
+}
+do_install() {
+  umount -R /target >/dev/null 2>&1
+  [ -n "$SWAPP" ] && swapoff "$SWAPP" >/dev/null 2>&1
+  [ "$PMODE" = auto ] && auto_partition
+  for i in $(seq 1 15); do [ -b "$ROOTP" ] && break; sleep 1; done
+  [ -b "$ROOTP" ] || die "Partisi root $ROOTP tidak ditemukan"
+  if [ -n "$SWAPP" ]; then [ -b "$SWAPP" ] || die "Partisi swap $SWAPP tidak ditemukan"; fi
+  [ "$(blockdev --getsize64 "$ROOTP")" -ge 4000000000 ] || die "Partisi root terlalu kecil (min 4 GB)"
+  step "Memformat partisi..."
+  run mkfs.ext4 -F -q -L webforge-root "$ROOTP"
+  if [ -n "$SWAPP" ]; then run mkswap -f -L webforge-swap "$SWAPP"; fi
+  if [ $UEFI = 1 ] && [ "$FMT_ESP" = 1 ]; then run mkfs.fat -F32 -n WFESP "$ESP"; fi
+  mkdir -p /target; run mount "$ROOTP" /target
+  copy_system
+  if [ $UEFI = 1 ]; then mkdir -p /target/boot/efi; run mount "$ESP" /target/boot/efi; fi
+  configure_system
+  install_bootloader
+  cleanup
+  return 0
+}
+
+# ---------- langkah wizard (return 1 = kembali) ----------
+s_keymap() {
+  local k
+  k=$(menu "Pilih layout keyboard" us "US (QWERTY)" uk "UK" de "Jerman" fr "Prancis" es "Spanyol" it "Italia" br-abnt2 "Brasil ABNT2" jp106 "Jepang 106" dvorak "Dvorak" other "Ketik nama lain...") || return 1
+  [ "$k" = other ] && { k=$(input "Nama keymap (contoh: us)" us) || return 1; }
+  if ! loadkeys "$k" >>"$LOG" 2>&1; then msg "Keymap '$k' tidak ditemukan, memakai us." Peringatan; k=us; loadkeys us >>"$LOG" 2>&1; fi
+  KEYMAP=$k; return 0
+}
+s_tz() {
+  local z
+  z=$(menu "Pilih zona waktu" Asia/Jakarta "WIB - Jakarta" Asia/Makassar "WITA - Makassar" Asia/Jayapura "WIT - Jayapura" UTC "UTC" other "Ketik zona lain...") || return 1
+  [ "$z" = other ] && { z=$(input "Zona waktu (contoh: Asia/Tokyo)" Asia/Jakarta) || return 1; }
+  [ -e "/usr/share/zoneinfo/$z" ] || { msg "Zona '$z' tidak ada, memakai UTC." Peringatan; z=UTC; }
+  TZ_=$z; return 0
+}
+s_host() {
+  local v
+  while :; do
+    v=$(input "Nama komputer (hostname)" "$HN") || return 1
+    [[ $v =~ ^[a-z0-9][a-z0-9-]{0,62}$ ]] && break
+    msg "Hostname hanya huruf kecil, angka, dan tanda minus." Peringatan
+  done
+  HN=$v; return 0
+}
+s_user() {
+  local v
+  while :; do
+    v=$(input "Nama pengguna baru (huruf kecil)" "$USERN") || return 1
+    [[ $v =~ ^[a-z_][a-z0-9_-]{0,30}$ ]] && [ "$v" != root ] && break
+    msg "Nama pengguna tidak valid." Peringatan
+  done
+  USERN=$v; return 0
+}
+s_userpw() { USERPW=$(askpw "pengguna $USERN") || return 1; return 0; }
+s_rootpw() { ROOTPW=$(askpw "root") || return 1; return 0; }
+s_disk() {
+  local LIVEDEV LIVEDISK n sz t m items=()
+  LIVEDEV=$(findmnt -no SOURCE /mnt/live/medium 2>/dev/null); LIVEDISK=""
+  [ -n "$LIVEDEV" ] && LIVEDISK=$(lsblk -no PKNAME "$LIVEDEV" 2>/dev/null | head -1)
+  [ -z "$LIVEDISK" ] && [ -n "$LIVEDEV" ] && LIVEDISK=${LIVEDEV#/dev/}
+  while read -r n sz t; do
+    [ "$t" = disk ] || continue
+    case "$n" in *zram*|*/ram*|*/loop*) continue;; esac
+    [ "${n#/dev/}" = "$LIVEDISK" ] && continue
+    m=$(lsblk -dno MODEL "$n" 2>/dev/null | sed 's/ *$//')
+    items+=("$n" "$sz ${m:-disk}")
+  done < <(lsblk -dpno NAME,SIZE,TYPE)
+  if [ ${#items[@]} -eq 0 ]; then msg "Tidak ada disk tujuan yang ditemukan." Error; return 1; fi
+  DISK=$(menu "Pilih disk tujuan instalasi" "${items[@]}") || return 1
+  return 0
+}
+s_pmode() {
+  local sz total
+  ROOTP=""; ESP=""; SWAPP=""; FMT_ESP=0; SWAPMB=0
+  PMODE=$(menu "Metode partisi untuk $DISK" auto "Otomatis: hapus SELURUH disk (root + swap)" manual "Manual: atur sendiri dengan cfdisk") || return 1
+  if [ "$PMODE" = manual ]; then
+    manual_partition || return 1
+  else
+    sz=$(menu "Ukuran swap" 2048 "2 GB (disarankan)" 1024 "1 GB" 4096 "4 GB" 8192 "8 GB" 0 "Tanpa swap") || return 1
+    total=$(( $(blockdev --getsize64 "$DISK") / 1048576 ))
+    if [ "$sz" -gt 0 ] && [ $((total - sz)) -lt 6000 ]; then
+      msg "Disk terlalu kecil untuk swap ${sz} MB (root butuh minimal 6 GB)." Peringatan; return 1
+    fi
+    SWAPMB=$sz
+  fi
+  return 0
+}
+s_confirm() {
+  local t sw
+  if [ "$PMODE" = auto ]; then sw=$([ "$SWAPMB" -gt 0 ] && echo "${SWAPMB} MB" || echo "tidak ada"); else sw=${SWAPP:-tidak ada}; fi
+  t="RINGKASAN\n\nDisk       : $DISK ($PMODE)\nFirmware   : $([ $UEFI = 1 ] && echo UEFI || echo BIOS)\nSwap       : $sw\nKeyboard   : $KEYMAP\nZona waktu : $TZ_\nHostname   : $HN\nPengguna   : $USERN\n\n$([ "$PMODE" = auto ] && echo "SEMUA DATA di $DISK akan DIHAPUS." || echo "Partisi $ROOTP akan DIFORMAT.")\n\nLanjutkan instalasi?"
+  if [ $MODE = tui ]; then
+    dialog --backtitle "$BT" --yes-label Instal --no-label Kembali --yesno "$t" 21 68 >&3
+  else
+    local a; read -rp "$(printf '%b' "$t") [y = instal, lainnya = kembali] " a; case $a in y*|Y*) return 0;; *) return 1;; esac
+  fi
+}
+
+exit_menu() {
+  local c
+  c=$(menu "Installer WebForge OS" restart "Mulai ulang installer" reboot "Reboot" poweroff "Matikan komputer" shell "Keluar ke shell (login live)") || return 0
+  case $c in
+    reboot)   cleanup; clear; systemctl reboot; sleep 60;;
+    poweroff) cleanup; clear; systemctl poweroff; sleep 60;;
+    shell)    cleanup; clear; exit 0;;
+  esac
+  return 0
+}
+finish() {
+  local c
+  c=$(menu "Instalasi selesai! Cabut media instalasi sebelum menyalakan ulang." reboot "Reboot sekarang" poweroff "Matikan komputer" shell "Kembali ke shell live") || c=shell
+  case $c in
+    reboot)   clear; systemctl reboot; sleep 60;;
+    poweroff) clear; systemctl poweroff; sleep 60;;
+  esac
+  clear; exit 0
+}
+
+# ================== ALUR UTAMA ==================
+[ -d /mnt/live/rootfs ] || { msg "Folder /mnt/live/rootfs tidak ada.\nJalankan installer dari media live WebForge OS." Error; exit 1; }
+msg "Selamat datang di installer WebForge OS.\n\nMode firmware: $([ $UEFI = 1 ] && echo UEFI || echo BIOS)\n\nAnda akan diminta: keyboard, zona waktu, nama komputer, akun pengguna, password root, dan disk tujuan.\nTombol Kembali / ketik < untuk mundur satu langkah." "Selamat datang"
+
+STEPS=(s_keymap s_tz s_host s_user s_userpw s_rootpw s_disk s_pmode s_confirm)
+DISKIDX=6
+i=0
+while :; do
+  if [ $i -ge ${#STEPS[@]} ]; then
+    ( do_install ); rc=$?
+    [ $rc -eq 0 ] && finish
+    i=$DISKIDX; continue          # gagal: kembali ke pemilihan disk
+  fi
+  ${STEPS[$i]}; rc=$?
+  if [ $rc -eq 0 ]; then i=$((i+1))
+  elif [ $i -gt 0 ]; then i=$((i-1))
+  else exit_menu; fi
+done

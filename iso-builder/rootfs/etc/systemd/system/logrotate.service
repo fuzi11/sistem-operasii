@@ -1,0 +1,10 @@
+[Unit]
+Description=Rotate log files
+Documentation=man:logrotate(8)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/logrotate /etc/logrotate.d/nginx
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
