@@ -1,7 +1,7 @@
 NAME="WebForge OS"
 VERSION="13.1-systemd (wefor)"
 ID=silios
-PRETTY_NAME="SiliOS 13.1-systemd (wefor Edition)"
+PRETTY_NAME="Webforge 1.0 (wefor Edition)"
 VERSION_CODENAME="wefor"
-HOME_URL="https://fuzi.web.id/"
+HOME_URL=""
 RELEASE_TYPE="stable"
